@@ -308,9 +308,10 @@ def run_iteration(
     codex_runner = codex_runner or (lambda prompt: run_codex_agent(prompt, root=root))
     max_attempts = max_attempts or int(os.environ.get("AUTORESEARCH_MAX_ATTEMPTS", "2"))
 
+    pristine_snapshot = snapshot_repo(root)
     baseline_metrics, _ = evaluate_candidate_patch(root)
-    prompt_summary_text = prompt_summary(root)
     baseline_snapshot = snapshot_repo(root)
+    prompt_summary_text = prompt_summary(root)
     previous_feedback: str | None = None
 
     if active_theorem_fully_proved(root):
@@ -333,7 +334,7 @@ def run_iteration(
                 root=root,
             )
             return {"status": "kept", "commit": commit_hash, "reason": reason, "promotion": promotion}
-        restore_snapshot(baseline_snapshot, root=root)
+        restore_snapshot(pristine_snapshot, root=root)
         append_history(
             prompt_summary_text="Promote already-proved active theorem",
             changed_claim_id=claim_id,
@@ -426,7 +427,7 @@ def run_iteration(
             root=root,
         )
 
-    restore_snapshot(baseline_snapshot, root=root)
+    restore_snapshot(pristine_snapshot, root=root)
     return {"status": "discarded", "reason": "max_attempts_exhausted", "score": baseline_metrics["score"]}
 
 
