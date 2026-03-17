@@ -7,8 +7,8 @@
 - num_active_claims_surviving_small_n: `1`
 - num_total_sorries: `1`
 - num_blocked_claims: `0`
-- eval_runtime_sec: `34.9774`
-- score: `(1, 1, 17, 9, 1, -1, 0, -34.9774)`
+- eval_runtime_sec: `13.467`
+- score: `(1, 1, 17, 9, 1, -1, 0, -13.467)`
 
 ## Notes
 

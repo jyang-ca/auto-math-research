@@ -66,34 +66,26 @@ def require_clean_worktree(root: Path = ROOT) -> None:
 
 def snapshot_repo(root: Path = ROOT) -> dict[str, str]:
     snapshot: dict[str, str] = {}
-    for path in root.rglob("*"):
-        if not path.is_file():
+    tracked = run_checked(["git", "ls-files"], cwd=root)
+    for relative in tracked.stdout.splitlines():
+        if not relative or relative == "state/history.jsonl":
             continue
-        relative = path.relative_to(root)
-        if relative.parts[0] in {".git", ".lake", "build"}:
-            continue
-        if str(relative) == "state/history.jsonl":
-            continue
-        snapshot[str(relative)] = path.read_text()
+        snapshot[relative] = (root / relative).read_text()
     return snapshot
 
 
 def restore_snapshot(snapshot: dict[str, str], *, root: Path = ROOT) -> None:
-    current_paths = set()
-    for path in root.rglob("*"):
-        if not path.is_file():
-            continue
-        relative = path.relative_to(root)
-        if relative.parts[0] in {".git", ".lake", "build"}:
-            continue
-        if str(relative) == "state/history.jsonl":
-            continue
-        current_paths.add(str(relative))
-    snapshot_paths = set(snapshot)
-    for relative in current_paths - snapshot_paths:
-        (root / relative).unlink()
     for relative, content in snapshot.items():
         write_text(root / relative, content)
+    for relative in git_status_paths(root):
+        if relative in {"state/history.jsonl", "state/llm_last_message.md"}:
+            continue
+        if relative in snapshot:
+            write_text(root / relative, snapshot[relative])
+            continue
+        path = root / relative
+        if path.exists():
+            path.unlink()
 
 
 def load_agent_context(root: Path = ROOT) -> dict[str, str]:
