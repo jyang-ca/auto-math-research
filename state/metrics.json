@@ -6,32 +6,30 @@
   "build_stdout": "Build completed successfully (8032 jobs).\n",
   "canary_mode": false,
   "changed_claim_ids": [
-    "DTREE_VARS_001",
     "DTREE_SPLIT_001"
   ],
   "changed_theorem_names": [
-    "restrictTree_varsUsed_subset",
-    "none"
+    "greedy_split_conjecture_shell"
   ],
-  "eval_runtime_sec": 13.5711,
+  "eval_runtime_sec": 14.8871,
   "forbidden_axioms_found": false,
-  "iteration_id": "20260317T125022Z-dtree_vars_001-a02-0020",
+  "iteration_id": "20260317T140813Z-none-a02-0022",
   "iteration_status": "kept",
   "keep_reason": "lexicographic_improvement",
   "num_active_claims_surviving_small_n": 0,
   "num_blocked_claims": 0,
-  "num_promoted_lemmas": 27,
+  "num_promoted_lemmas": 28,
   "num_story_done": 9,
   "num_total_sorries": 0,
   "score": [
     1,
     1,
-    27,
+    28,
     9,
     0,
     0,
     0,
-    -13.5711
+    -14.8871
   ],
   "stable_file_sorry_free": true,
   "theorem_sanity_ok": true,

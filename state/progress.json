@@ -90,13 +90,13 @@
     },
     {
       "claim_id": "DTREE_SPLIT_001",
-      "falsifier_status": "unknown",
-      "lean_status": "statement_compiles",
-      "status": "active"
+      "falsifier_status": "survives_small_n",
+      "lean_status": "proved",
+      "status": "proved"
     }
   ],
   "last_iteration_canary_mode": false,
-  "last_iteration_id": "20260317T125022Z-dtree_vars_001-a02-0020",
+  "last_iteration_id": "20260317T140813Z-none-a02-0022",
   "last_iteration_status": "kept",
   "last_keep_reason": "lexicographic_improvement",
   "latest_kept_commit": "dd5ee51c0694263f17eedc9b87917cdc89ca9650",

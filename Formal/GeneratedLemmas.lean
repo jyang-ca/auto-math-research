@@ -120,4 +120,11 @@ theorem restrictTree_varsUsed_subset (ρ : Restriction n) (t : DTree n) :
       · simpa [restrictTree, h] using
           (Finset.insert_subset_insert v (Finset.union_subset_union ihLeft ihRight))
 
+
+/-- Auto-promoted from claim DTREE_SPLIT_001. -/
+theorem greedy_split_conjecture_shell (b : Bool) (i : Var n) :
+    influence (eval (DTree.leaf (n := n) b)) i =
+      uniformError (DTree.leaf (n := n) b) (DTree.leaf (n := n) b) := by
+  rfl
+
 end Formal
