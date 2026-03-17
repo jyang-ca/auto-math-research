@@ -1,35 +1,35 @@
 {
   "active_claim_counterexample": null,
-  "active_claim_result": "not_executable",
+  "active_claim_result": "survives_small_n",
   "build_ok": true,
   "build_stderr": "",
   "build_stdout": "Build completed successfully (8032 jobs).\n",
   "canary_mode": false,
   "changed_claim_ids": [
-    "DTREE_SPLIT_001"
+    "DTREE_ERR_001"
   ],
   "changed_theorem_names": [
-    "greedy_split_conjecture_shell"
+    "uniformError_leaf_self_zero"
   ],
-  "eval_runtime_sec": 14.8871,
+  "eval_runtime_sec": 14.7153,
   "forbidden_axioms_found": false,
-  "iteration_id": "20260317T140813Z-none-a02-0022",
+  "iteration_id": "20260317T142140Z-none-a01-0023",
   "iteration_status": "kept",
   "keep_reason": "lexicographic_improvement",
-  "num_active_claims_surviving_small_n": 0,
+  "num_active_claims_surviving_small_n": 1,
   "num_blocked_claims": 0,
-  "num_promoted_lemmas": 28,
+  "num_promoted_lemmas": 29,
   "num_story_done": 9,
   "num_total_sorries": 0,
   "score": [
     1,
     1,
-    28,
+    29,
     9,
+    1,
     0,
     0,
-    0,
-    -14.8871
+    -14.7153
   ],
   "stable_file_sorry_free": true,
   "theorem_sanity_ok": true,

@@ -127,4 +127,10 @@ theorem greedy_split_conjecture_shell (b : Bool) (i : Var n) :
       uniformError (DTree.leaf (n := n) b) (DTree.leaf (n := n) b) := by
   rfl
 
+
+/-- Auto-promoted from claim DTREE_ERR_001. -/
+theorem uniformError_leaf_self_zero (b : Bool) :
+    uniformError (DTree.leaf (n := n) b) (DTree.leaf (n := n) b) = 0 := by
+  simpa using active_uniformError_self_zero (t := DTree.leaf (n := n) b)
+
 end Formal

@@ -1,5 +1,5 @@
 {
-  "active_claim_id": "DTREE_SPLIT_001",
+  "active_claim_id": "DTREE_ERR_001",
   "active_story_id": "ST-11",
   "baseline_metrics_file": "state/metrics.json",
   "canary_gate_complete": true,
@@ -96,7 +96,7 @@
     }
   ],
   "last_iteration_canary_mode": false,
-  "last_iteration_id": "20260317T140813Z-none-a02-0022",
+  "last_iteration_id": "20260317T142140Z-none-a01-0023",
   "last_iteration_status": "kept",
   "last_keep_reason": "lexicographic_improvement",
   "latest_kept_commit": "06cf8938667ad6ac96358c2c0c67739c756862d1",
