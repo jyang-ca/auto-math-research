@@ -1,5 +1,5 @@
 {
-  "active_claim_id": "CANARY_KEEP_003",
+  "active_claim_id": "CANARY_KEEP_004",
   "active_story_id": "ST-11",
   "baseline_metrics_file": "state/metrics.json",
   "claims": [
@@ -47,13 +47,19 @@
     },
     {
       "claim_id": "CANARY_KEEP_003",
+      "falsifier_status": "survives_small_n",
+      "lean_status": "proved",
+      "status": "proved"
+    },
+    {
+      "claim_id": "CANARY_KEEP_004",
       "falsifier_status": "unknown",
       "lean_status": "statement_compiles",
       "status": "active"
     }
   ],
   "last_iteration_canary_mode": true,
-  "last_iteration_id": "20260317T114512Z-canary_keep_002-a01-0009",
+  "last_iteration_id": "20260317T114832Z-canary_keep_003-a01-0010",
   "last_iteration_status": "kept",
   "last_keep_reason": "lexicographic_improvement",
   "latest_kept_commit": "c831e8b0df5ae3561e3fcd9043965c6b4a311c21",
