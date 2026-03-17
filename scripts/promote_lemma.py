@@ -132,6 +132,7 @@ def promote_active_theorem(
     root: Path = PROJECT_ROOT,
     claim_id: str | None = None,
     theorem_name: str | None = None,
+    next_claim_id: str | None = None,
 ) -> PromotionResult:
     active_path = root / "Formal" / "Active.lean"
     generated_path = root / "Formal" / "GeneratedLemmas.lean"
@@ -150,23 +151,23 @@ def promote_active_theorem(
         raise ValueError("Active theorem still contains sorry; refusing to promote.")
 
     claim_rows = load_jsonl(claims_path)
-    next_claim_id = choose_next_claim(promoted_claim_id, claim_rows, root=root)
-    next_story_id = infer_story_id(next_claim_id)
+    selected_next_claim_id = next_claim_id or choose_next_claim(promoted_claim_id, claim_rows, root=root)
+    next_story_id = infer_story_id(selected_next_claim_id)
 
     append_to_generated(generated_path, theorem_block, promoted_claim_id)
-    write_text(active_path, active_template_for_claim(next_claim_id))
+    write_text(active_path, active_template_for_claim(selected_next_claim_id))
 
-    updated_claim_rows = update_claim_rows(claim_rows, promoted_claim_id, next_claim_id)
+    updated_claim_rows = update_claim_rows(claim_rows, promoted_claim_id, selected_next_claim_id)
     write_jsonl(claims_path, updated_claim_rows)
-    write_jsonl(candidates_path, update_claim_rows(load_jsonl(candidates_path), promoted_claim_id, next_claim_id))
+    write_jsonl(candidates_path, update_claim_rows(load_jsonl(candidates_path), promoted_claim_id, selected_next_claim_id))
 
     progress = json.loads(progress_path.read_text())
-    progress_path.write_text(json.dumps(update_progress(progress, promoted_claim_id, next_claim_id), indent=2) + "\n")
+    progress_path.write_text(json.dumps(update_progress(progress, promoted_claim_id, selected_next_claim_id), indent=2) + "\n")
 
     return PromotionResult(
         promoted_claim_id=promoted_claim_id,
         theorem_name=promoted_theorem_name,
-        next_claim_id=next_claim_id,
+        next_claim_id=selected_next_claim_id,
         next_story_id=next_story_id,
         updated_files=[
             str(active_path.relative_to(root)),
@@ -182,10 +183,15 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--claim-id")
     parser.add_argument("--theorem-name")
+    parser.add_argument("--next-claim-id")
     args = parser.parse_args()
 
     try:
-        result = promote_active_theorem(claim_id=args.claim_id, theorem_name=args.theorem_name)
+        result = promote_active_theorem(
+            claim_id=args.claim_id,
+            theorem_name=args.theorem_name,
+            next_claim_id=args.next_claim_id,
+        )
     except ValueError as exc:
         print(str(exc))
         return 1
