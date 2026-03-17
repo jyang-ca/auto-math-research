@@ -1,6 +1,7 @@
 /.lake
 /build
 /__pycache__
+**/__pycache__/
 /.mypy_cache
 /state/falsifier_results.json
 /state/falsifier_current.json
