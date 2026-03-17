@@ -1,0 +1,28 @@
+{
+  "active_claim_counterexample": null,
+  "active_claim_result": "survives_small_n",
+  "build_ok": true,
+  "build_stderr": "",
+  "build_stdout": "\u2714 [8028/8031] Built Formal.Conjectures (17s)\n\u26a0 [8029/8031] Built Formal.Active (10s)\nwarning: Formal/Active.lean:14:8: declaration uses `sorry`\n\u2714 [8030/8031] Built Formal (10s)\nBuild completed successfully (8031 jobs).\n",
+  "eval_runtime_sec": 58.0061,
+  "forbidden_axioms_found": false,
+  "num_active_claims_surviving_small_n": 1,
+  "num_blocked_claims": 0,
+  "num_promoted_lemmas": 16,
+  "num_story_done": 8,
+  "num_total_sorries": 1,
+  "score": [
+    1,
+    1,
+    16,
+    8,
+    1,
+    -1,
+    0,
+    -58.0061
+  ],
+  "stable_file_sorry_free": true,
+  "theorem_sanity_ok": true,
+  "theorem_sanity_stderr": "",
+  "theorem_sanity_stdout": "inductive Formal.DTree : \u2115 \u2192 Type\nnumber of parameters: 1\nconstructors:\nFormal.DTree.leaf : {n : \u2115} \u2192 Bool \u2192 DTree n\nFormal.DTree.node : {n : \u2115} \u2192 Var n \u2192 DTree n \u2192 DTree n \u2192 DTree n\nFormal.eval {n : \u2115} : DTree n \u2192 Assignment n \u2192 Bool\nFormal.uniformErrorFn {n : \u2115} (f g : Assignment n \u2192 Bool) : \u211a\nFormal.influence {n : \u2115} (f : Assignment n \u2192 Bool) (i : Var n) : \u211a\n"
+}
