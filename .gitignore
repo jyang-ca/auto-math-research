@@ -5,3 +5,5 @@
 /.mypy_cache
 /state/falsifier_results.json
 /state/falsifier_current.json
+/state/history.jsonl
+/state/llm_last_message.md

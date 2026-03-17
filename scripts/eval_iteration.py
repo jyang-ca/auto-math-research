@@ -28,6 +28,7 @@ def stable_files_sorry_free() -> bool:
     stable_files = [
         FORMAL_DIR / "Defs.lean",
         FORMAL_DIR / "Known.lean",
+        FORMAL_DIR / "GeneratedLemmas.lean",
         FORMAL_DIR / "Conjectures.lean",
         FORMAL_DIR / "Scratch.lean",
     ]
@@ -35,7 +36,10 @@ def stable_files_sorry_free() -> bool:
 
 
 def count_promoted_lemmas() -> int:
-    return count_regex_matches(FORMAL_DIR / "Known.lean", r"^\s*theorem\s+")
+    return (
+        count_regex_matches(FORMAL_DIR / "Known.lean", r"^\s*theorem\s+")
+        + count_regex_matches(FORMAL_DIR / "GeneratedLemmas.lean", r"^\s*theorem\s+")
+    )
 
 
 def theorem_sanity_check() -> subprocess.CompletedProcess[str]:

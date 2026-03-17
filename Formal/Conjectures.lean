@@ -1,4 +1,4 @@
-import Formal.Known
+import Formal.GeneratedLemmas
 
 namespace Formal
 

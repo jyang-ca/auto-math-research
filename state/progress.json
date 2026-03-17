@@ -1,8 +1,8 @@
 {
   "project_id": "solveall_decision_tree_formalization_mvp",
   "problem_focus": "uniform proper learning of decision trees; monotone-target milestone",
-  "active_story_id": "ST-06",
-  "active_claim_id": "DTREE_ERR_001",
+  "active_story_id": "ST-07",
+  "active_claim_id": "DTREE_INF_003",
   "stories": [
     {
       "story_id": "ST-00",
@@ -193,6 +193,18 @@
       "status": "proved",
       "lean_status": "proved",
       "falsifier_status": "survives_small_n"
+    },
+    {
+      "claim_id": "DTREE_ERR_002",
+      "status": "proved",
+      "lean_status": "proved",
+      "falsifier_status": "survives_small_n"
+    },
+    {
+      "claim_id": "DTREE_INF_003",
+      "status": "active",
+      "lean_status": "statement_compiles",
+      "falsifier_status": "unknown"
     }
   ],
   "latest_kept_commit": "c831e8b0df5ae3561e3fcd9043965c6b4a311c21",

@@ -23,8 +23,24 @@ def score_tuple(metrics: dict) -> tuple:
     )
 
 
+def primary_score(metrics: dict) -> tuple:
+    return score_tuple(metrics)[:5]
+
+
+def secondary_score(metrics: dict) -> tuple:
+    return score_tuple(metrics)[5:]
+
+
 def better(trial: dict, baseline: dict) -> bool:
     return score_tuple(trial) > score_tuple(baseline)
+
+
+def keep_candidate(trial: dict, baseline: dict) -> tuple[bool, str]:
+    if better(trial, baseline):
+        return True, "lexicographic_improvement"
+    if primary_score(trial) == primary_score(baseline) and secondary_score(trial) > secondary_score(baseline):
+        return True, "secondary_metrics_improved"
+    return False, "no_objective_improvement"
 
 
 def main() -> int:
@@ -39,6 +55,7 @@ def main() -> int:
         "baseline_score": score_tuple(baseline),
         "trial_score": score_tuple(trial),
         "better": better(trial, baseline),
+        "keep_decision": keep_candidate(trial, baseline),
     }
     print(json.dumps(payload, indent=2))
     return 0
