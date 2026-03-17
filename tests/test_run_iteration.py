@@ -10,7 +10,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from scripts.claim_templates import active_template_for_claim
-from scripts.run_iteration import AgentRunResult, history_path, replay_history_entry, run_iteration
+from scripts.run_iteration import AgentRunResult, history_path, prepare_frontier, replay_history_entry, run_iteration
 
 
 def write(path: Path, content: str) -> None:
@@ -158,6 +158,39 @@ def fake_eval_factory(root: Path):
 
 
 class RunIterationAtomicTests(unittest.TestCase):
+    def test_kept_run_records_latest_kept_commit(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            seed_repo(root, active_claim_id="DTREE_ERR_001")
+            baseline_active = (root / "Formal" / "Active.lean").read_text()
+
+            def fake_codex(_prompt: str) -> AgentRunResult:
+                write(root / "Formal" / "Active.lean", prove_self_zero(baseline_active))
+                return AgentRunResult(returncode=0, stdout="", stderr="", last_message="proved the wrapper")
+
+            with patch.dict(os.environ, {"AUTORESEARCH_DISABLE_CANARY": "1"}):
+                with patch(
+                    "scripts.run_iteration.evaluate_candidate_patch",
+                    side_effect=[
+                        (metric(1, promoted=0), {}),
+                        (metric(0, promoted=0), {"build_stdout": "", "build_stderr": "", "falsifier_stdout": "", "falsifier_stderr": "", "eval_stdout": "", "eval_stderr": ""}),
+                    ],
+                ), patch(
+                    "scripts.run_iteration.evaluate_post_keep_state",
+                    return_value=(metric(1, promoted=1), {"build_stdout": "", "build_stderr": "", "eval_stdout": "", "eval_stderr": ""}),
+                ), patch(
+                    "scripts.run_iteration.run_post_keep_invariants",
+                    return_value=(True, "ok"),
+                ):
+                    result = run_iteration(root=root, codex_runner=fake_codex, max_attempts=1)
+
+            self.assertEqual(result["status"], "kept")
+            progress = json.loads((root / "state" / "progress.json").read_text())
+            self.assertEqual(progress["latest_kept_commit"], result["commit"])
+            self.assertIn("progress_commit", result)
+            self.assertNotEqual(result["commit"], result["progress_commit"])
+            self.assertEqual(git(["git", "status", "--short"], root), "")
+
     def test_promotion_failure_triggers_full_rollback(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)
@@ -311,6 +344,46 @@ class RunIterationAtomicTests(unittest.TestCase):
             self.assertIn("canary_uniformError_self_zero_001", generated)
             self.assertIn("canary_uniformError_self_zero_002", generated)
             self.assertIn("canary_uniformError_self_zero_003", generated)
+
+    def test_prepare_frontier_reactivates_real_frontier_after_canary_gate(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            seed_repo(root, active_claim_id="DTREE_INF_003")
+            for i in range(1, 4):
+                git(["git", "commit", "--allow-empty", "-m", f"canary-{i}"], root)
+                entry = {
+                    "iteration_id": f"canary-{i}",
+                    "status": "kept",
+                    "canary_mode": True,
+                    "commit_hash": git(["git", "rev-parse", "HEAD"], root),
+                }
+                write(history_path(root), ((history_path(root).read_text() if history_path(root).exists() else "") + json.dumps(entry) + "\n"))
+
+            write(root / "Formal" / "Active.lean", active_template_for_claim("CANARY_KEEP_006"))
+            claims = [json.loads(line) for line in (root / "claims" / "claims.jsonl").read_text().splitlines() if line.strip()]
+            claims.append(claim_row("CANARY_KEEP_006", status="active", lean_name="canary_uniformError_self_zero_006", lean_status="statement_compiles"))
+            write(root / "claims" / "claims.jsonl", "\n".join(json.dumps(row, sort_keys=True) for row in claims) + "\n")
+            write(root / "claims" / "candidates.jsonl", "\n".join(json.dumps(row, sort_keys=True) for row in claims) + "\n")
+            progress = json.loads((root / "state" / "progress.json").read_text())
+            progress["active_claim_id"] = "CANARY_KEEP_006"
+            progress["active_story_id"] = "ST-11"
+            progress["claims"].append(
+                {
+                    "claim_id": "CANARY_KEEP_006",
+                    "status": "active",
+                    "lean_status": "statement_compiles",
+                    "falsifier_status": "unknown",
+                }
+            )
+            write(root / "state" / "progress.json", json.dumps(progress, indent=2) + "\n")
+
+            frontier = prepare_frontier(root=root)
+
+            self.assertFalse(frontier["canary_mode"])
+            self.assertEqual(frontier["active_claim_id"], "DTREE_INF_003")
+            repaired_progress = json.loads((root / "state" / "progress.json").read_text())
+            self.assertEqual(repaired_progress["active_claim_id"], "DTREE_INF_003")
+            self.assertIn("claim_id: DTREE_INF_003", (root / "Formal" / "Active.lean").read_text())
 
 
 if __name__ == "__main__":

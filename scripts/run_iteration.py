@@ -301,6 +301,38 @@ def git_commit(message: str, *, root: Path = ROOT) -> str:
     return git_head(root)
 
 
+def update_progress_latest_kept_commit(commit_hash: str, *, root: Path = ROOT) -> None:
+    progress_path = root / "state" / "progress.json"
+    progress = read_json(progress_path)
+    progress["latest_kept_commit"] = commit_hash
+    write_json(progress_path, progress)
+
+
+def git_commit_paths(message: str, paths: list[str], *, root: Path = ROOT) -> str:
+    add = run_checked(["git", "add", *paths], cwd=root)
+    if add.returncode != 0:
+        raise RuntimeError(add.stderr or add.stdout or "git add failed")
+    commit = run_checked(["git", "commit", "-m", message], cwd=root)
+    if commit.returncode != 0:
+        raise RuntimeError(commit.stderr or commit.stdout or "git commit failed")
+    return git_head(root)
+
+
+def record_latest_kept_commit(commit_hash: str, *, root: Path = ROOT) -> str:
+    progress_path = root / "state" / "progress.json"
+    committed_progress = progress_path.read_text()
+    update_progress_latest_kept_commit(commit_hash, root=root)
+    try:
+        return git_commit_paths(
+            f"codex: record latest kept commit {commit_hash[:12]}",
+            ["state/progress.json"],
+            root=root,
+        )
+    except RuntimeError as exc:
+        write_text(progress_path, committed_progress)
+        raise RuntimeError(f"record_latest_kept_commit_failed: {exc}") from exc
+
+
 def load_history(root: Path = ROOT) -> list[dict]:
     return load_jsonl(history_path(root))
 
@@ -444,6 +476,13 @@ def prepare_frontier(root: Path = ROOT) -> dict[str, object]:
     progress = read_json(root / "state" / "progress.json")
     current_claim_id = progress.get("active_claim_id")
     streak = consecutive_canary_keeps(root)
+    if streak >= CANARY_REQUIRED_KEEPS and is_canary_claim_id(current_claim_id):
+        activate_claim(root, CANARY_RESUME_CLAIM_ID)
+        return {
+            "canary_mode": False,
+            "canary_streak": streak,
+            "active_claim_id": CANARY_RESUME_CLAIM_ID,
+        }
     if not is_canary_mode_enabled(root) or streak >= CANARY_REQUIRED_KEEPS:
         return {
             "canary_mode": False,
@@ -877,13 +916,22 @@ def run_iteration(
                 raise StageFailure("invariants", invariant_reason, invariant_reason)
 
             commit_hash = git_commit(f"codex: keep iteration {iteration_id}", root=root)
-            update_history_entry(iteration_id, {"commit_hash": commit_hash}, root=root)
+            metadata_commit_hash = record_latest_kept_commit(commit_hash, root=root)
+            update_history_entry(
+                iteration_id,
+                {
+                    "commit_hash": commit_hash,
+                    "progress_commit_hash": metadata_commit_hash,
+                },
+                root=root,
+            )
             if git_status_paths(root):
                 raise StageFailure("commit", "clean_committed_state", "git worktree is not clean after commit")
 
             return {
                 "status": "kept",
                 "commit": commit_hash,
+                "progress_commit": metadata_commit_hash,
                 "reason": final_reason,
                 "promotion": promotion,
                 "agent_message": agent_result.last_message,
