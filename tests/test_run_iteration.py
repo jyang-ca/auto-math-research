@@ -121,6 +121,7 @@ def seed_repo(root: Path, *, active_claim_id: str) -> None:
                 "active_claim_id": active_claim_id,
                 "stories": [],
                 "claims": progress_claims,
+                "canary_gate_complete": False,
                 "latest_kept_commit": None,
                 "baseline_metrics_file": "state/metrics.json",
             },
@@ -344,6 +345,7 @@ class RunIterationAtomicTests(unittest.TestCase):
             self.assertTrue(all(result["canary_mode"] for result in results))
             self.assertEqual(git(["git", "status", "--short"], root), "")
             progress = json.loads((root / "state" / "progress.json").read_text())
+            self.assertTrue(progress["canary_gate_complete"])
             self.assertEqual(progress["active_claim_id"], "DTREE_INF_003")
             active_text = (root / "Formal" / "Active.lean").read_text()
             self.assertIn("claim_id: DTREE_INF_003", active_text)
@@ -389,6 +391,7 @@ class RunIterationAtomicTests(unittest.TestCase):
             self.assertFalse(frontier["canary_mode"])
             self.assertEqual(frontier["active_claim_id"], "DTREE_INF_003")
             repaired_progress = json.loads((root / "state" / "progress.json").read_text())
+            self.assertTrue(repaired_progress["canary_gate_complete"])
             self.assertEqual(repaired_progress["active_claim_id"], "DTREE_INF_003")
             self.assertIn("claim_id: DTREE_INF_003", (root / "Formal" / "Active.lean").read_text())
 
@@ -408,6 +411,100 @@ class RunIterationAtomicTests(unittest.TestCase):
             )
 
             self.assertEqual(consecutive_canary_keeps(root), 3)
+
+    def test_prepare_frontier_does_not_reenter_canary_after_gate_completion(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            seed_repo(root, active_claim_id="DTREE_INF_003")
+
+            claims = [json.loads(line) for line in (root / "claims" / "claims.jsonl").read_text().splitlines() if line.strip()]
+            claims.append(
+                claim_row(
+                    "DTREE_VARS_001",
+                    status="active",
+                    lean_name="restrictTree_varsUsed_subset",
+                    lean_status="statement_compiles",
+                    falsifier_status="unknown",
+                )
+            )
+            for row in claims:
+                if row["claim_id"] == "DTREE_INF_003":
+                    row["status"] = "proved"
+                    row["lean_status"] = "proved"
+                elif row["claim_id"] != "DTREE_VARS_001":
+                    row["status"] = "candidate"
+            write(root / "claims" / "claims.jsonl", "\n".join(json.dumps(row, sort_keys=True) for row in claims) + "\n")
+            write(root / "claims" / "candidates.jsonl", "\n".join(json.dumps(row, sort_keys=True) for row in claims) + "\n")
+            write(root / "Formal" / "Active.lean", active_template_for_claim("DTREE_VARS_001"))
+
+            progress = json.loads((root / "state" / "progress.json").read_text())
+            progress["canary_gate_complete"] = True
+            progress["active_claim_id"] = "DTREE_VARS_001"
+            progress["active_story_id"] = "ST-11"
+            progress["claims"].append(
+                {
+                    "claim_id": "DTREE_VARS_001",
+                    "status": "active",
+                    "lean_status": "statement_compiles",
+                    "falsifier_status": "unknown",
+                }
+            )
+            for claim in progress["claims"]:
+                if claim["claim_id"] == "DTREE_INF_003":
+                    claim["status"] = "proved"
+                    claim["lean_status"] = "proved"
+                elif claim["claim_id"] != "DTREE_VARS_001":
+                    claim["status"] = "candidate"
+            write(root / "state" / "progress.json", json.dumps(progress, indent=2) + "\n")
+
+            frontier = prepare_frontier(root=root)
+
+            self.assertFalse(frontier["canary_mode"])
+            self.assertEqual(frontier["active_claim_id"], "DTREE_VARS_001")
+            repaired_progress = json.loads((root / "state" / "progress.json").read_text())
+            self.assertTrue(repaired_progress["canary_gate_complete"])
+            self.assertEqual(repaired_progress["active_claim_id"], "DTREE_VARS_001")
+            self.assertIn("claim_id: DTREE_VARS_001", (root / "Formal" / "Active.lean").read_text())
+
+    def test_prepare_frontier_recovers_gate_completion_from_promoted_canaries(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            seed_repo(root, active_claim_id="DTREE_INF_003")
+
+            claims = [json.loads(line) for line in (root / "claims" / "claims.jsonl").read_text().splitlines() if line.strip()]
+            claims.extend(
+                [
+                    claim_row("CANARY_KEEP_001", status="proved", lean_name="canary_uniformError_self_zero_001", lean_status="proved"),
+                    claim_row("CANARY_KEEP_002", status="proved", lean_name="canary_uniformError_self_zero_002", lean_status="proved"),
+                    claim_row("CANARY_KEEP_003", status="proved", lean_name="canary_uniformError_self_zero_003", lean_status="proved"),
+                    claim_row("CANARY_KEEP_008", status="active", lean_name="canary_uniformError_self_zero_008", lean_status="statement_compiles"),
+                ]
+            )
+            write(root / "claims" / "claims.jsonl", "\n".join(json.dumps(row, sort_keys=True) for row in claims) + "\n")
+            write(root / "claims" / "candidates.jsonl", "\n".join(json.dumps(row, sort_keys=True) for row in claims) + "\n")
+            write(root / "Formal" / "Active.lean", active_template_for_claim("CANARY_KEEP_008"))
+
+            progress = json.loads((root / "state" / "progress.json").read_text())
+            progress["active_claim_id"] = "CANARY_KEEP_008"
+            progress["active_story_id"] = "ST-11"
+            progress["claims"].extend(
+                [
+                    {"claim_id": "CANARY_KEEP_001", "status": "proved", "lean_status": "proved", "falsifier_status": "survives_small_n"},
+                    {"claim_id": "CANARY_KEEP_002", "status": "proved", "lean_status": "proved", "falsifier_status": "survives_small_n"},
+                    {"claim_id": "CANARY_KEEP_003", "status": "proved", "lean_status": "proved", "falsifier_status": "survives_small_n"},
+                    {"claim_id": "CANARY_KEEP_008", "status": "active", "lean_status": "statement_compiles", "falsifier_status": "survives_small_n"},
+                ]
+            )
+            write(root / "state" / "progress.json", json.dumps(progress, indent=2) + "\n")
+
+            frontier = prepare_frontier(root=root)
+
+            self.assertFalse(frontier["canary_mode"])
+            self.assertEqual(frontier["active_claim_id"], "DTREE_INF_003")
+            repaired_progress = json.loads((root / "state" / "progress.json").read_text())
+            self.assertTrue(repaired_progress["canary_gate_complete"])
+            self.assertEqual(repaired_progress["active_claim_id"], "DTREE_INF_003")
+            self.assertIn("claim_id: DTREE_INF_003", (root / "Formal" / "Active.lean").read_text())
 
 
 if __name__ == "__main__":

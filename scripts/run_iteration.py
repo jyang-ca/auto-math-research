@@ -393,6 +393,26 @@ def is_canary_mode_enabled(root: Path = ROOT) -> bool:
     return os.environ.get("AUTORESEARCH_DISABLE_CANARY", "0") != "1"
 
 
+def canary_gate_complete(root: Path = ROOT) -> bool:
+    progress = read_json(root / "state" / "progress.json")
+    if progress.get("canary_gate_complete", False):
+        return True
+    return promoted_canary_count(root) >= CANARY_REQUIRED_KEEPS
+
+
+def set_canary_gate_complete(value: bool, *, root: Path = ROOT) -> None:
+    progress = read_json(root / "state" / "progress.json")
+    progress["canary_gate_complete"] = value
+    write_json(root / "state" / "progress.json", progress)
+
+
+def ensure_canary_gate_complete(root: Path = ROOT) -> bool:
+    complete = canary_gate_complete(root)
+    if complete:
+        set_canary_gate_complete(True, root=root)
+    return complete
+
+
 def consecutive_canary_keeps(root: Path = ROOT) -> int:
     streak = 0
     for entry in reversed(load_history(root)):
@@ -471,14 +491,18 @@ def prepare_frontier(root: Path = ROOT) -> dict[str, object]:
     progress = read_json(root / "state" / "progress.json")
     current_claim_id = progress.get("active_claim_id")
     streak = consecutive_canary_keeps(root)
-    if streak >= CANARY_REQUIRED_KEEPS and is_canary_claim_id(current_claim_id):
+    gate_complete = ensure_canary_gate_complete(root)
+    if streak >= CANARY_REQUIRED_KEEPS and not gate_complete:
+        set_canary_gate_complete(True, root=root)
+        gate_complete = True
+    if gate_complete and is_canary_claim_id(current_claim_id):
         activate_claim(root, CANARY_RESUME_CLAIM_ID)
         return {
             "canary_mode": False,
             "canary_streak": streak,
             "active_claim_id": CANARY_RESUME_CLAIM_ID,
         }
-    if not is_canary_mode_enabled(root) or streak >= CANARY_REQUIRED_KEEPS:
+    if gate_complete or not is_canary_mode_enabled(root):
         return {
             "canary_mode": False,
             "canary_streak": streak,
@@ -849,6 +873,8 @@ def run_iteration(
                 canary_mode=bool(frontier_mode["canary_mode"]),
                 canary_streak=int(frontier_mode["canary_streak"]),
             )
+            if bool(frontier_mode["canary_mode"]) and next_claim_id == CANARY_RESUME_CLAIM_ID:
+                set_canary_gate_complete(True, root=root)
             promotion = maybe_promote_and_reseed(root=root, next_claim_id=next_claim_id)
             if promotion is not None:
                 changed_claim_ids = [promotion["promoted_claim_id"]]
