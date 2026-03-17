@@ -544,7 +544,7 @@ def history_agrees(
 
 def promoted_lemma_visible(theorem_name: str, *, root: Path = ROOT) -> bool:
     with tempfile.NamedTemporaryFile("w", suffix=".lean", delete=False) as handle:
-        handle.write(f"import Formal.GeneratedLemmas\n\n#check {theorem_name}\n")
+        handle.write(f"import Formal.GeneratedLemmas\n\nopen Formal\n\n#check {theorem_name}\n")
         temp_path = Path(handle.name)
     try:
         process = run_checked(["lake", "env", "lean", str(temp_path)], cwd=root)
