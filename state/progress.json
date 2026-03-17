@@ -1,5 +1,5 @@
 {
-  "active_claim_id": "DTREE_VARS_001",
+  "active_claim_id": "DTREE_SPLIT_001",
   "active_story_id": "ST-11",
   "baseline_metrics_file": "state/metrics.json",
   "canary_gate_complete": true,
@@ -78,19 +78,25 @@
     },
     {
       "claim_id": "DTREE_VARS_001",
-      "falsifier_status": "unknown",
-      "lean_status": "statement_compiles",
-      "status": "active"
+      "falsifier_status": "survives_small_n",
+      "lean_status": "proved",
+      "status": "proved"
     },
     {
       "claim_id": "CANARY_KEEP_008",
       "falsifier_status": "survives_small_n",
       "lean_status": "proved",
       "status": "proved"
+    },
+    {
+      "claim_id": "DTREE_SPLIT_001",
+      "falsifier_status": "unknown",
+      "lean_status": "statement_compiles",
+      "status": "active"
     }
   ],
   "last_iteration_canary_mode": false,
-  "last_iteration_id": "20260317T124257Z-dtree_inf_003-a02-0018",
+  "last_iteration_id": "20260317T125022Z-dtree_vars_001-a02-0020",
   "last_iteration_status": "kept",
   "last_keep_reason": "lexicographic_improvement",
   "latest_kept_commit": "9d89b1e6c1fc900596769a1c7b7c70d8dbc70d05",

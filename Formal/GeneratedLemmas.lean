@@ -95,4 +95,29 @@ theorem canary_uniformError_self_zero_008 (t : DTree n) :
     uniformError t t = 0 := by
   simpa using active_uniformError_self_zero (t := t)
 
+
+/-- Auto-promoted from claim DTREE_VARS_001. -/
+theorem restrictTree_varsUsed_subset (ρ : Restriction n) (t : DTree n) :
+    varsUsed (restrictTree ρ t) ⊆ varsUsed t := by
+  induction t with
+  | leaf b =>
+      simp [restrictTree]
+  | node v left right ihLeft ihRight =>
+      by_cases h : v ∈ ρ.dom
+      · by_cases hv : ρ.val v
+        · simpa [restrictTree, h, hv] using
+            (show varsUsed (restrictTree ρ right) ⊆ insert v (varsUsed left ∪ varsUsed right) from
+              calc
+                varsUsed (restrictTree ρ right) ⊆ varsUsed right := ihRight
+                _ ⊆ varsUsed left ∪ varsUsed right := Finset.subset_union_right
+                _ ⊆ insert v (varsUsed left ∪ varsUsed right) := Finset.subset_insert _ _)
+        · simpa [restrictTree, h, hv] using
+            (show varsUsed (restrictTree ρ left) ⊆ insert v (varsUsed left ∪ varsUsed right) from
+              calc
+                varsUsed (restrictTree ρ left) ⊆ varsUsed left := ihLeft
+                _ ⊆ varsUsed left ∪ varsUsed right := Finset.subset_union_left
+                _ ⊆ insert v (varsUsed left ∪ varsUsed right) := Finset.subset_insert _ _)
+      · simpa [restrictTree, h] using
+          (Finset.insert_subset_insert v (Finset.union_subset_union ihLeft ihRight))
+
 end Formal

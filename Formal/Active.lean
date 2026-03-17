@@ -3,16 +3,15 @@ import Formal.Conjectures
 namespace Formal
 
 /- ACTIVE_METADATA
-claim_id: DTREE_VARS_001
+claim_id: NONE
 story_id: ST-11
-objective: prove_theorem
-task: theorem_proof
-theorem_name: restrictTree_varsUsed_subset
-allow_sorry: true
+objective: statement_only
+task: idle
+theorem_name: none
+allow_sorry: false
 -/
 
-theorem restrictTree_varsUsed_subset (ρ : Restriction n) (t : DTree n) :
-    varsUsed (restrictTree ρ t) ⊆ varsUsed t := by
-  sorry
+-- No active theorem is currently seeded. Promotion completed successfully,
+-- but the next claim still needs a Lean theorem shell.
 
 end Formal
