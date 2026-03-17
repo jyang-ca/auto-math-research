@@ -4,7 +4,7 @@
   "build_ok": true,
   "build_stderr": "",
   "build_stdout": "\u26a0 [8030/8032] Replayed Formal.Active\nwarning: Formal/Active.lean:14:8: declaration uses `sorry`\nBuild completed successfully (8032 jobs).\n",
-  "eval_runtime_sec": 13.467,
+  "eval_runtime_sec": 13.4203,
   "forbidden_axioms_found": false,
   "num_active_claims_surviving_small_n": 1,
   "num_blocked_claims": 0,
@@ -19,7 +19,7 @@
     1,
     -1,
     0,
-    -13.467
+    -13.4203
   ],
   "stable_file_sorry_free": true,
   "theorem_sanity_ok": true,

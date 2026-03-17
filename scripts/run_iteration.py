@@ -359,9 +359,9 @@ def run_iteration(
         )
         claim_id, theorem_name = iteration_claim_and_theorem(root)
         agent_result = codex_runner(prompt)
+        agent_changed_files = changed_paths_after_agent(root)
+        bad_files = unauthorized_changes(agent_changed_files)
         trial_metrics, outputs = evaluate_candidate_patch(root)
-        changed_files = changed_paths_after_agent(root)
-        bad_files = unauthorized_changes(changed_files)
         keep, reason = keep_candidate(trial_metrics, baseline_metrics)
         if bad_files:
             keep = False
@@ -411,7 +411,7 @@ def run_iteration(
                 "agent_message": agent_result.last_message,
             }
 
-        previous_feedback = format_feedback(reason, outputs, changed_files)
+        previous_feedback = format_feedback(reason, outputs, agent_changed_files)
         restore_snapshot(baseline_snapshot, root=root)
         append_history(
             prompt_summary_text=prompt_summary_text,
@@ -426,8 +426,8 @@ def run_iteration(
             root=root,
         )
 
-    final_metrics, _ = evaluate_candidate_patch(root)
-    return {"status": "discarded", "reason": "max_attempts_exhausted", "score": final_metrics["score"]}
+    restore_snapshot(baseline_snapshot, root=root)
+    return {"status": "discarded", "reason": "max_attempts_exhausted", "score": baseline_metrics["score"]}
 
 
 def main() -> int:
