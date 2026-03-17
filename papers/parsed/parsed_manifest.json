@@ -1,0 +1,64 @@
+{
+  "papers": [
+    {
+      "abstract": "Seed metadata for the SolveAll open-problem statement.",
+      "authors": [
+        "Placeholder seed"
+      ],
+      "paper_id": "blanc22_open_problem",
+      "sections": [
+        "Abstract",
+        "Definitions",
+        "Milestones",
+        "Barriers"
+      ],
+      "theorem_like_sentences": [],
+      "title": "Open Problem Note on Properly Learning Decision Trees"
+    },
+    {
+      "abstract": "Seed metadata for the almost-polynomial-time learner context.",
+      "authors": [
+        "Placeholder seed"
+      ],
+      "paper_id": "blanc24_almost_poly",
+      "sections": [
+        "Abstract",
+        "Definitions",
+        "Milestones",
+        "Barriers"
+      ],
+      "theorem_like_sentences": [],
+      "title": "An Almost-Polynomial-Time Algorithm for Learning Decision Trees"
+    },
+    {
+      "abstract": "Seed metadata for hardness and barrier claims.",
+      "authors": [
+        "Placeholder seed"
+      ],
+      "paper_id": "hardness23",
+      "sections": [
+        "Abstract",
+        "Definitions",
+        "Milestones",
+        "Barriers"
+      ],
+      "theorem_like_sentences": [],
+      "title": "Hardness Results for Query Learning of Decision Trees"
+    },
+    {
+      "abstract": "Seed metadata for follow-up lower-bound style claims.",
+      "authors": [
+        "Placeholder seed"
+      ],
+      "paper_id": "inapprox24",
+      "sections": [
+        "Abstract",
+        "Definitions",
+        "Milestones",
+        "Barriers"
+      ],
+      "theorem_like_sentences": [],
+      "title": "Inapproximability Follow-Up for Learning Decision Trees"
+    }
+  ]
+}
