@@ -46,4 +46,41 @@ theorem canary_uniformError_self_zero_006 (t : DTree n) :
     uniformError t t = 0 := by
   simpa using canary_uniformError_self_zero_005 (t := t)
 
+
+/-- Auto-promoted from claim DTREE_INF_003. -/
+theorem influence_unused_variable_zero (t : DTree n) {i : Var n}
+    (h : i ∉ varsUsed t) :
+    influence (eval t) i = 0 := by
+  have hflip_eval :
+      ∀ t : DTree n, i ∉ varsUsed t → ∀ a : Assignment n, eval t (flipBit a i) = eval t a := by
+    intro t
+    induction t with
+    | leaf b =>
+        intro _ a
+        simp
+    | node v left right ihLeft ihRight =>
+        intro h a
+        have hiv : i ≠ v := by
+          intro hEq
+          apply h
+          simp [varsUsed, hEq]
+        have hvi : v ≠ i := by
+          intro hEq
+          exact hiv hEq.symm
+        have hleft : i ∉ varsUsed left := by
+          intro hi
+          apply h
+          simp [varsUsed, hi]
+        have hright : i ∉ varsUsed right := by
+          intro hi
+          apply h
+          simp [varsUsed, hi]
+        simp [flipBit_ne (a := a) (i := i) (j := v) hvi, ihLeft hleft a, ihRight hright a]
+  unfold influence
+  have hfun : (fun a => eval t (flipBit a i)) = eval t := by
+    funext a
+    exact hflip_eval t h a
+  rw [hfun]
+  exact uniformErrorFn_self (f := eval t)
+
 end Formal

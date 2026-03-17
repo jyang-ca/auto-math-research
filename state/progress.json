@@ -1,5 +1,5 @@
 {
-  "active_claim_id": "CANARY_KEEP_007",
+  "active_claim_id": "DTREE_VARS_001",
   "active_story_id": "ST-11",
   "baseline_metrics_file": "state/metrics.json",
   "claims": [
@@ -29,9 +29,9 @@
     },
     {
       "claim_id": "DTREE_INF_003",
-      "falsifier_status": "unknown",
-      "lean_status": "statement_compiles",
-      "status": "candidate"
+      "falsifier_status": "survives_small_n",
+      "lean_status": "proved",
+      "status": "proved"
     },
     {
       "claim_id": "CANARY_KEEP_001",
@@ -73,11 +73,17 @@
       "claim_id": "CANARY_KEEP_007",
       "falsifier_status": "unknown",
       "lean_status": "statement_compiles",
+      "status": "candidate"
+    },
+    {
+      "claim_id": "DTREE_VARS_001",
+      "falsifier_status": "unknown",
+      "lean_status": "statement_compiles",
       "status": "active"
     }
   ],
-  "last_iteration_canary_mode": true,
-  "last_iteration_id": "20260317T121157Z-canary_keep_006-a01-0013",
+  "last_iteration_canary_mode": false,
+  "last_iteration_id": "20260317T122041Z-dtree_inf_003-a02-0015",
   "last_iteration_status": "kept",
   "last_keep_reason": "lexicographic_improvement",
   "latest_kept_commit": "123222f1507cfab1f73f34f6ccdc53e936c7294e",
