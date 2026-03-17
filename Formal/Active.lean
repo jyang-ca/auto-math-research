@@ -3,17 +3,16 @@ import Formal.Conjectures
 namespace Formal
 
 /- ACTIVE_METADATA
-claim_id: DTREE_INF_003
-story_id: ST-07
+claim_id: CANARY_KEEP_002
+story_id: ST-11
 objective: prove_theorem
 task: theorem_proof
-theorem_name: influence_unused_variable_zero
+theorem_name: canary_uniformError_self_zero_002
 allow_sorry: true
 -/
 
-theorem influence_unused_variable_zero (t : DTree n) {i : Var n}
-    (h : i ∉ varsUsed t) :
-    influence (eval t) i = 0 := by
+theorem canary_uniformError_self_zero_002 (t : DTree n) :
+    uniformError t t = 0 := by
   sorry
 
 end Formal

@@ -1,24 +1,71 @@
 {
-  "project_id": "solveall_decision_tree_formalization_mvp",
+  "active_claim_id": "CANARY_KEEP_002",
+  "active_story_id": "ST-11",
+  "baseline_metrics_file": "state/metrics.json",
+  "claims": [
+    {
+      "claim_id": "DTREE_ERR_001",
+      "falsifier_status": "survives_small_n",
+      "lean_status": "proved",
+      "status": "proved"
+    },
+    {
+      "claim_id": "BLANC22_MONO_001",
+      "falsifier_status": "survives_small_n",
+      "lean_status": "proved",
+      "status": "proved"
+    },
+    {
+      "claim_id": "DTREE_RES_001",
+      "falsifier_status": "survives_small_n",
+      "lean_status": "proved",
+      "status": "proved"
+    },
+    {
+      "claim_id": "DTREE_ERR_002",
+      "falsifier_status": "survives_small_n",
+      "lean_status": "proved",
+      "status": "proved"
+    },
+    {
+      "claim_id": "DTREE_INF_003",
+      "falsifier_status": "unknown",
+      "lean_status": "statement_compiles",
+      "status": "candidate"
+    },
+    {
+      "claim_id": "CANARY_KEEP_001",
+      "falsifier_status": "survives_small_n",
+      "lean_status": "proved",
+      "status": "proved"
+    },
+    {
+      "claim_id": "CANARY_KEEP_002",
+      "falsifier_status": "unknown",
+      "lean_status": "statement_compiles",
+      "status": "active"
+    }
+  ],
+  "last_iteration_canary_mode": true,
+  "last_iteration_id": "20260317T113706Z-canary_keep_001-a01-0008",
+  "last_iteration_status": "kept",
+  "last_keep_reason": "lexicographic_improvement",
+  "latest_kept_commit": "c831e8b0df5ae3561e3fcd9043965c6b4a311c21",
   "problem_focus": "uniform proper learning of decision trees; monotone-target milestone",
-  "active_story_id": "ST-07",
-  "active_claim_id": "DTREE_INF_003",
+  "project_id": "solveall_decision_tree_formalization_mvp",
   "stories": [
     {
-      "story_id": "ST-00",
-      "title": "Setup Lean project",
-      "status": "done",
       "acceptance": [
         "lake build succeeds on a clean checkout"
       ],
       "evidence": [
         "working_tree:init"
-      ]
+      ],
+      "status": "done",
+      "story_id": "ST-00",
+      "title": "Setup Lean project"
     },
     {
-      "story_id": "ST-01",
-      "title": "Define decision trees and semantics",
-      "status": "done",
       "acceptance": [
         "lake build",
         "eval_leaf proved",
@@ -26,12 +73,12 @@
       ],
       "evidence": [
         "Formal/Defs.lean"
-      ]
+      ],
+      "status": "done",
+      "story_id": "ST-01",
+      "title": "Define decision trees and semantics"
     },
     {
-      "story_id": "ST-02",
-      "title": "Define structural measures",
-      "status": "done",
       "acceptance": [
         "lake build",
         "basic simp lemmas proved",
@@ -40,12 +87,12 @@
       "evidence": [
         "Formal/Defs.lean",
         "Formal/Scratch.lean"
-      ]
+      ],
+      "status": "done",
+      "story_id": "ST-02",
+      "title": "Define structural measures"
     },
     {
-      "story_id": "ST-03",
-      "title": "Define restrictions",
-      "status": "done",
       "acceptance": [
         "restrictTree compiles",
         "restrictFn compiles",
@@ -53,12 +100,12 @@
       ],
       "evidence": [
         "Formal/Defs.lean"
-      ]
+      ],
+      "status": "done",
+      "story_id": "ST-03",
+      "title": "Define restrictions"
     },
     {
-      "story_id": "ST-04",
-      "title": "Define monotonicity",
-      "status": "done",
       "acceptance": [
         "assignment order defined",
         "isMonotoneFn compiles",
@@ -67,12 +114,12 @@
       "evidence": [
         "Formal/Defs.lean",
         "Formal/Known.lean"
-      ]
+      ],
+      "status": "done",
+      "story_id": "ST-04",
+      "title": "Define monotonicity"
     },
     {
-      "story_id": "ST-05",
-      "title": "Prove restriction preserves monotonicity",
-      "status": "done",
       "acceptance": [
         "theorem compiles with no sorry",
         "falsifier survives",
@@ -80,12 +127,12 @@
       ],
       "evidence": [
         "Formal/Known.lean"
-      ]
+      ],
+      "status": "done",
+      "story_id": "ST-05",
+      "title": "Prove restriction preserves monotonicity"
     },
     {
-      "story_id": "ST-06",
-      "title": "Define uniform error and agreement lemmas",
-      "status": "done",
       "acceptance": [
         "normalized disagreement defined",
         "symmetry/reflexivity lemmas proved",
@@ -95,12 +142,12 @@
         "Formal/Defs.lean",
         "Formal/Active.lean",
         "commit:c831e8b0df5ae3561e3fcd9043965c6b4a311c21"
-      ]
+      ],
+      "status": "done",
+      "story_id": "ST-06",
+      "title": "Define uniform error and agreement lemmas"
     },
     {
-      "story_id": "ST-07",
-      "title": "Define influence",
-      "status": "done",
       "acceptance": [
         "influence compiles",
         "bit-flip semantics tested",
@@ -110,34 +157,34 @@
         "Formal/Defs.lean",
         "Formal/Known.lean",
         "Formal/Scratch.lean"
-      ]
+      ],
+      "status": "done",
+      "story_id": "ST-07",
+      "title": "Define influence"
     },
     {
-      "story_id": "ST-08",
-      "title": "Formalize milestone statements",
-      "status": "done",
       "acceptance": [
         "statement shells compile",
         "dependencies imported and named stably"
       ],
       "evidence": [
         "Formal/Conjectures.lean"
-      ]
+      ],
+      "status": "done",
+      "story_id": "ST-08",
+      "title": "Formalize milestone statements"
     },
     {
-      "story_id": "ST-09",
-      "title": "Claim extraction pipeline",
-      "status": "pending",
       "acceptance": [
         "at least 10 claim cards are created",
         "cards have source metadata and tags"
       ],
-      "evidence": []
+      "evidence": [],
+      "status": "pending",
+      "story_id": "ST-09",
+      "title": "Claim extraction pipeline"
     },
     {
-      "story_id": "ST-10",
-      "title": "Bounded falsifier",
-      "status": "active",
       "acceptance": [
         "search over small cases runs",
         "results saved to JSON",
@@ -145,12 +192,12 @@
       ],
       "evidence": [
         "scripts/falsify_small.py"
-      ]
+      ],
+      "status": "active",
+      "story_id": "ST-10",
+      "title": "Bounded falsifier"
     },
     {
-      "story_id": "ST-11",
-      "title": "Single-file autoresearch loop",
-      "status": "active",
       "acceptance": [
         "baseline eval",
         "agent edit",
@@ -160,53 +207,22 @@
       ],
       "evidence": [
         "scripts/run_iteration.py"
-      ]
+      ],
+      "status": "active",
+      "story_id": "ST-11",
+      "title": "Single-file autoresearch loop"
     },
     {
-      "story_id": "ST-12",
-      "title": "Promotion pipeline",
-      "status": "pending",
       "acceptance": [
         "promotion script copies theorem block",
         "imports updated",
         "lake build reruns",
         "progress updated"
       ],
-      "evidence": []
+      "evidence": [],
+      "status": "pending",
+      "story_id": "ST-12",
+      "title": "Promotion pipeline"
     }
-  ],
-  "claims": [
-    {
-      "claim_id": "DTREE_ERR_001",
-      "status": "proved",
-      "lean_status": "proved",
-      "falsifier_status": "survives_small_n"
-    },
-    {
-      "claim_id": "BLANC22_MONO_001",
-      "status": "proved",
-      "lean_status": "proved",
-      "falsifier_status": "survives_small_n"
-    },
-    {
-      "claim_id": "DTREE_RES_001",
-      "status": "proved",
-      "lean_status": "proved",
-      "falsifier_status": "survives_small_n"
-    },
-    {
-      "claim_id": "DTREE_ERR_002",
-      "status": "proved",
-      "lean_status": "proved",
-      "falsifier_status": "survives_small_n"
-    },
-    {
-      "claim_id": "DTREE_INF_003",
-      "status": "active",
-      "lean_status": "statement_compiles",
-      "falsifier_status": "unknown"
-    }
-  ],
-  "latest_kept_commit": "c831e8b0df5ae3561e3fcd9043965c6b4a311c21",
-  "baseline_metrics_file": "state/metrics.json"
+  ]
 }
