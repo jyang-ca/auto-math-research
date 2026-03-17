@@ -10,7 +10,14 @@ from pathlib import Path
 from unittest.mock import patch
 
 from scripts.claim_templates import active_template_for_claim
-from scripts.run_iteration import AgentRunResult, history_path, prepare_frontier, replay_history_entry, run_iteration
+from scripts.run_iteration import (
+    AgentRunResult,
+    consecutive_canary_keeps,
+    history_path,
+    prepare_frontier,
+    replay_history_entry,
+    run_iteration,
+)
 
 
 def write(path: Path, content: str) -> None:
@@ -384,6 +391,23 @@ class RunIterationAtomicTests(unittest.TestCase):
             repaired_progress = json.loads((root / "state" / "progress.json").read_text())
             self.assertEqual(repaired_progress["active_claim_id"], "DTREE_INF_003")
             self.assertIn("claim_id: DTREE_INF_003", (root / "Formal" / "Active.lean").read_text())
+
+    def test_consecutive_canary_keeps_ignores_older_failed_canaries(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            seed_repo(root, active_claim_id="DTREE_INF_003")
+            entries = [
+                {"iteration_id": "old-failed", "status": "discarded", "canary_mode": True},
+                {"iteration_id": "keep-1", "status": "kept", "canary_mode": True},
+                {"iteration_id": "keep-2", "status": "kept", "canary_mode": True},
+                {"iteration_id": "keep-3", "status": "kept", "canary_mode": True},
+            ]
+            write(
+                history_path(root),
+                "\n".join(json.dumps(entry, sort_keys=True) for entry in entries) + "\n",
+            )
+
+            self.assertEqual(consecutive_canary_keeps(root), 3)
 
 
 if __name__ == "__main__":

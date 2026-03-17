@@ -396,14 +396,9 @@ def is_canary_mode_enabled(root: Path = ROOT) -> bool:
 def consecutive_canary_keeps(root: Path = ROOT) -> int:
     streak = 0
     for entry in reversed(load_history(root)):
-        if not entry.get("canary_mode"):
-            if streak:
-                break
-            return 0
-        if entry.get("status") == "kept":
-            streak += 1
-            continue
-        return 0
+        if not entry.get("canary_mode") or entry.get("status") != "kept":
+            break
+        streak += 1
     return streak
 
 
