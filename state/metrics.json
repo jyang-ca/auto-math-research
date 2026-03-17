@@ -4,34 +4,34 @@
   "build_ok": true,
   "build_stderr": "",
   "build_stdout": "\u26a0 [8030/8032] Replayed Formal.Active\nwarning: Formal/Active.lean:14:8: declaration uses `sorry`\nBuild completed successfully (8032 jobs).\n",
-  "canary_mode": true,
+  "canary_mode": false,
   "changed_claim_ids": [
-    "CANARY_KEEP_007",
-    "CANARY_KEEP_008"
+    "CANARY_KEEP_008",
+    "DTREE_VARS_001"
   ],
   "changed_theorem_names": [
-    "canary_uniformError_self_zero_007",
-    "canary_uniformError_self_zero_008"
+    "canary_uniformError_self_zero_008",
+    "restrictTree_varsUsed_subset"
   ],
-  "eval_runtime_sec": 15.3876,
+  "eval_runtime_sec": 13.5411,
   "forbidden_axioms_found": false,
-  "iteration_id": "20260317T122643Z-canary_keep_007-a01-0016",
+  "iteration_id": "20260317T124257Z-dtree_inf_003-a02-0018",
   "iteration_status": "kept",
   "keep_reason": "lexicographic_improvement",
   "num_active_claims_surviving_small_n": 0,
   "num_blocked_claims": 0,
-  "num_promoted_lemmas": 25,
+  "num_promoted_lemmas": 26,
   "num_story_done": 9,
   "num_total_sorries": 1,
   "score": [
     1,
     1,
-    25,
+    26,
     9,
     0,
     -1,
     0,
-    -15.3876
+    -13.5411
   ],
   "stable_file_sorry_free": true,
   "theorem_sanity_ok": true,

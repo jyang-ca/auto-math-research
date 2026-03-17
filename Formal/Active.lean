@@ -3,16 +3,16 @@ import Formal.Conjectures
 namespace Formal
 
 /- ACTIVE_METADATA
-claim_id: CANARY_KEEP_008
+claim_id: DTREE_VARS_001
 story_id: ST-11
 objective: prove_theorem
 task: theorem_proof
-theorem_name: canary_uniformError_self_zero_008
+theorem_name: restrictTree_varsUsed_subset
 allow_sorry: true
 -/
 
-theorem canary_uniformError_self_zero_008 (t : DTree n) :
-    uniformError t t = 0 := by
+theorem restrictTree_varsUsed_subset (ρ : Restriction n) (t : DTree n) :
+    varsUsed (restrictTree ρ t) ⊆ varsUsed t := by
   sorry
 
 end Formal
