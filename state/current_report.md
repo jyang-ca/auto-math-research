@@ -2,13 +2,13 @@
 
 - build_ok: `True`
 - stable_file_sorry_free: `True`
-- num_promoted_lemmas: `21`
+- num_promoted_lemmas: `22`
 - num_story_done: `9`
 - num_active_claims_surviving_small_n: `0`
 - num_total_sorries: `1`
 - num_blocked_claims: `0`
-- eval_runtime_sec: `14.2043`
-- score: `(1, 1, 21, 9, 0, -1, 0, -14.2043)`
+- eval_runtime_sec: `14.0583`
+- score: `(1, 1, 22, 9, 0, -1, 0, -14.0583)`
 
 ## Notes
 

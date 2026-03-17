@@ -3,15 +3,15 @@ import Formal.Conjectures
 namespace Formal
 
 /- ACTIVE_METADATA
-claim_id: CANARY_KEEP_005
+claim_id: CANARY_KEEP_006
 story_id: ST-11
 objective: prove_theorem
 task: theorem_proof
-theorem_name: canary_uniformError_self_zero_005
+theorem_name: canary_uniformError_self_zero_006
 allow_sorry: true
 -/
 
-theorem canary_uniformError_self_zero_005 (t : DTree n) :
+theorem canary_uniformError_self_zero_006 (t : DTree n) :
     uniformError t t = 0 := by
   sorry
 

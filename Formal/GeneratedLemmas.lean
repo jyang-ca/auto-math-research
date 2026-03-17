@@ -34,4 +34,10 @@ theorem canary_uniformError_self_zero_004 (t : DTree n) :
     uniformError t t = 0 := by
   simpa [uniformError] using (uniformErrorFn_self (f := eval t))
 
+
+/-- Auto-promoted from claim CANARY_KEEP_005. -/
+theorem canary_uniformError_self_zero_005 (t : DTree n) :
+    uniformError t t = 0 := by
+  simpa using canary_uniformError_self_zero_004 (t := t)
+
 end Formal
