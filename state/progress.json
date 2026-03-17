@@ -93,7 +93,7 @@
   "last_iteration_id": "20260317T124257Z-dtree_inf_003-a02-0018",
   "last_iteration_status": "kept",
   "last_keep_reason": "lexicographic_improvement",
-  "latest_kept_commit": "a0eeb3f085605299402ca19e3630e19a191b1d07",
+  "latest_kept_commit": "9d89b1e6c1fc900596769a1c7b7c70d8dbc70d05",
   "problem_focus": "uniform proper learning of decision trees; monotone-target milestone",
   "project_id": "solveall_decision_tree_formalization_mvp",
   "stories": [
