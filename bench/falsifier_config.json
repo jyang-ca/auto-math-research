@@ -1,0 +1,7 @@
+{
+  "n_max": 4,
+  "max_internal_nodes": 3,
+  "max_examples": 50000,
+  "random_trees_per_n": 24,
+  "random_seed": 17
+}

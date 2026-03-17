@@ -1,0 +1,5 @@
+{
+  "sample_tree_sizes": [0, 1, 2, 3],
+  "sample_dimensions": [0, 1, 2, 3, 4],
+  "notes": "Small bounded families used by the Python falsifier."
+}

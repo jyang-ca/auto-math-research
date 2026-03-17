@@ -1,0 +1,2 @@
+
+{"active_claim_id": "DTREE_ERR_001", "active_story_id": "ST-06", "baseline_score": [1, 1, 16, 8, 1, -1, 0, -17.9099], "commit": "c831e8b0df5ae3561e3fcd9043965c6b4a311c21", "edit_result": {"changed": "true", "reason": "applied_template:active_uniformError_self_zero"}, "status": "kept", "timestamp": "2026-03-17T08:19:30.638159+00:00", "trial_score": [1, 1, 16, 8, 1, 0, 0, -37.6882]}

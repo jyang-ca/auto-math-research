@@ -1,0 +1,200 @@
+{
+  "project_id": "solveall_decision_tree_formalization_mvp",
+  "problem_focus": "uniform proper learning of decision trees; monotone-target milestone",
+  "active_story_id": "ST-06",
+  "active_claim_id": "DTREE_ERR_001",
+  "stories": [
+    {
+      "story_id": "ST-00",
+      "title": "Setup Lean project",
+      "status": "done",
+      "acceptance": [
+        "lake build succeeds on a clean checkout"
+      ],
+      "evidence": [
+        "working_tree:init"
+      ]
+    },
+    {
+      "story_id": "ST-01",
+      "title": "Define decision trees and semantics",
+      "status": "done",
+      "acceptance": [
+        "lake build",
+        "eval_leaf proved",
+        "eval_node proved"
+      ],
+      "evidence": [
+        "Formal/Defs.lean"
+      ]
+    },
+    {
+      "story_id": "ST-02",
+      "title": "Define structural measures",
+      "status": "done",
+      "acceptance": [
+        "lake build",
+        "basic simp lemmas proved",
+        "sample-tree guards pass"
+      ],
+      "evidence": [
+        "Formal/Defs.lean",
+        "Formal/Scratch.lean"
+      ]
+    },
+    {
+      "story_id": "ST-03",
+      "title": "Define restrictions",
+      "status": "done",
+      "acceptance": [
+        "restrictTree compiles",
+        "restrictFn compiles",
+        "semantic agreement theorem proved"
+      ],
+      "evidence": [
+        "Formal/Defs.lean"
+      ]
+    },
+    {
+      "story_id": "ST-04",
+      "title": "Define monotonicity",
+      "status": "done",
+      "acceptance": [
+        "assignment order defined",
+        "isMonotoneFn compiles",
+        "examples checked"
+      ],
+      "evidence": [
+        "Formal/Defs.lean",
+        "Formal/Known.lean"
+      ]
+    },
+    {
+      "story_id": "ST-05",
+      "title": "Prove restriction preserves monotonicity",
+      "status": "done",
+      "acceptance": [
+        "theorem compiles with no sorry",
+        "falsifier survives",
+        "lemma promoted to Known.lean"
+      ],
+      "evidence": [
+        "Formal/Known.lean"
+      ]
+    },
+    {
+      "story_id": "ST-06",
+      "title": "Define uniform error and agreement lemmas",
+      "status": "done",
+      "acceptance": [
+        "normalized disagreement defined",
+        "symmetry/reflexivity lemmas proved",
+        "Python evaluator matches Lean examples"
+      ],
+      "evidence": [
+        "Formal/Defs.lean",
+        "Formal/Active.lean",
+        "commit:c831e8b0df5ae3561e3fcd9043965c6b4a311c21"
+      ]
+    },
+    {
+      "story_id": "ST-07",
+      "title": "Define influence",
+      "status": "done",
+      "acceptance": [
+        "influence compiles",
+        "bit-flip semantics tested",
+        "three sanity lemmas proved"
+      ],
+      "evidence": [
+        "Formal/Defs.lean",
+        "Formal/Known.lean",
+        "Formal/Scratch.lean"
+      ]
+    },
+    {
+      "story_id": "ST-08",
+      "title": "Formalize milestone statements",
+      "status": "done",
+      "acceptance": [
+        "statement shells compile",
+        "dependencies imported and named stably"
+      ],
+      "evidence": [
+        "Formal/Conjectures.lean"
+      ]
+    },
+    {
+      "story_id": "ST-09",
+      "title": "Claim extraction pipeline",
+      "status": "pending",
+      "acceptance": [
+        "at least 10 claim cards are created",
+        "cards have source metadata and tags"
+      ],
+      "evidence": []
+    },
+    {
+      "story_id": "ST-10",
+      "title": "Bounded falsifier",
+      "status": "active",
+      "acceptance": [
+        "search over small cases runs",
+        "results saved to JSON",
+        "current conjecture classified automatically"
+      ],
+      "evidence": [
+        "scripts/falsify_small.py"
+      ]
+    },
+    {
+      "story_id": "ST-11",
+      "title": "Single-file autoresearch loop",
+      "status": "active",
+      "acceptance": [
+        "baseline eval",
+        "agent edit",
+        "post-edit eval",
+        "commit or revert",
+        "JSONL logging"
+      ],
+      "evidence": [
+        "scripts/run_iteration.py"
+      ]
+    },
+    {
+      "story_id": "ST-12",
+      "title": "Promotion pipeline",
+      "status": "pending",
+      "acceptance": [
+        "promotion script copies theorem block",
+        "imports updated",
+        "lake build reruns",
+        "progress updated"
+      ],
+      "evidence": []
+    }
+  ],
+  "claims": [
+    {
+      "claim_id": "DTREE_ERR_001",
+      "status": "proved",
+      "lean_status": "proved",
+      "falsifier_status": "survives_small_n"
+    },
+    {
+      "claim_id": "BLANC22_MONO_001",
+      "status": "proved",
+      "lean_status": "proved",
+      "falsifier_status": "survives_small_n"
+    },
+    {
+      "claim_id": "DTREE_RES_001",
+      "status": "proved",
+      "lean_status": "proved",
+      "falsifier_status": "survives_small_n"
+    }
+  ],
+  "latest_kept_commit": "c831e8b0df5ae3561e3fcd9043965c6b4a311c21",
+  "baseline_metrics_file": "state/metrics.json"
+}

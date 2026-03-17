@@ -1,0 +1,36 @@
+{
+  "papers": [
+    {
+      "paper_id": "blanc22_open_problem",
+      "title": "Open Problem Note on Properly Learning Decision Trees",
+      "authors": ["Placeholder seed"],
+      "year": 2022,
+      "path": "papers/raw/blanc22_open_problem.pdf",
+      "abstract": "Seed metadata for the SolveAll open-problem statement."
+    },
+    {
+      "paper_id": "blanc24_almost_poly",
+      "title": "An Almost-Polynomial-Time Algorithm for Learning Decision Trees",
+      "authors": ["Placeholder seed"],
+      "year": 2024,
+      "path": "papers/raw/blanc24_almost_poly.pdf",
+      "abstract": "Seed metadata for the almost-polynomial-time learner context."
+    },
+    {
+      "paper_id": "hardness23",
+      "title": "Hardness Results for Query Learning of Decision Trees",
+      "authors": ["Placeholder seed"],
+      "year": 2023,
+      "path": "papers/raw/hardness23.pdf",
+      "abstract": "Seed metadata for hardness and barrier claims."
+    },
+    {
+      "paper_id": "inapprox24",
+      "title": "Inapproximability Follow-Up for Learning Decision Trees",
+      "authors": ["Placeholder seed"],
+      "year": 2024,
+      "path": "papers/raw/inapprox24.pdf",
+      "abstract": "Seed metadata for follow-up lower-bound style claims."
+    }
+  ]
+}
