@@ -506,6 +506,59 @@ class RunIterationAtomicTests(unittest.TestCase):
             self.assertEqual(repaired_progress["active_claim_id"], "DTREE_INF_003")
             self.assertIn("claim_id: DTREE_INF_003", (root / "Formal" / "Active.lean").read_text())
 
+    def test_run_iteration_discards_claim_theorem_mismatch(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            seed_repo(root, active_claim_id="DTREE_ERR_001")
+
+            def fake_codex(_prompt: str) -> AgentRunResult:
+                text = active_template_for_claim("DTREE_ERR_001")
+                text = text.replace("theorem_name: active_uniformError_self_zero", "theorem_name: uniformError_leaf_self_zero")
+                text = text.replace(
+                    "theorem active_uniformError_self_zero (t : DTree n) :\n    uniformError t t = 0 := by\n  sorry\n",
+                    "theorem uniformError_leaf_self_zero (b : Bool) :\n    uniformError (DTree.leaf (n := n) b) (DTree.leaf (n := n) b) = 0 := by\n  simpa using active_uniformError_self_zero (t := DTree.leaf (n := n) b)\n",
+                )
+                write(root / "Formal" / "Active.lean", text)
+                return AgentRunResult(returncode=0, stdout="", stderr="", last_message="introduced mismatched theorem name")
+
+            with patch.dict(os.environ, {"AUTORESEARCH_DISABLE_CANARY": "1"}):
+                with patch(
+                    "scripts.run_iteration.evaluate_candidate_patch",
+                    return_value=(metric(1), {"build_stdout": "", "build_stderr": "", "falsifier_stdout": "", "falsifier_stderr": "", "eval_stdout": "", "eval_stderr": ""}),
+                ):
+                    result = run_iteration(root=root, codex_runner=fake_codex, max_attempts=1)
+
+            self.assertEqual(result["status"], "discarded")
+            history = [json.loads(line) for line in history_path(root).read_text().splitlines() if line.strip()]
+            self.assertEqual(history[-1]["failure_invariant"], "claim_theorem_alignment")
+
+    def test_run_iteration_errors_when_idle_frontier_has_no_claims(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            seed_repo(root, active_claim_id="DTREE_ERR_001")
+            write(root / "Formal" / "Active.lean", active_template_for_claim(None))
+
+            claims = [json.loads(line) for line in (root / "claims" / "claims.jsonl").read_text().splitlines() if line.strip()]
+            for row in claims:
+                row["status"] = "proved"
+                row["lean_status"] = "proved"
+            write(root / "claims" / "claims.jsonl", "\n".join(json.dumps(row, sort_keys=True) for row in claims) + "\n")
+            write(root / "claims" / "candidates.jsonl", "\n".join(json.dumps(row, sort_keys=True) for row in claims) + "\n")
+
+            progress = json.loads((root / "state" / "progress.json").read_text())
+            progress["active_claim_id"] = None
+            progress["active_story_id"] = "ST-11"
+            for claim in progress["claims"]:
+                claim["status"] = "proved"
+                claim["lean_status"] = "proved"
+            write(root / "state" / "progress.json", json.dumps(progress, indent=2) + "\n")
+            git(["git", "add", "."], root)
+            git(["git", "commit", "-m", "idle-frontier"], root)
+
+            with patch.dict(os.environ, {"AUTORESEARCH_DISABLE_CANARY": "1"}):
+                with self.assertRaisesRegex(RuntimeError, "No active frontier claim is available"):
+                    run_iteration(root=root, codex_runner=lambda _prompt: AgentRunResult(0, "", "", ""), max_attempts=1)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -22,7 +22,7 @@ from scripts.claim_templates import (
     is_canary_claim_id,
 )
 from scripts.common import load_jsonl, read_json, read_text_if_exists, run_checked, run_checked_input, write_json, write_jsonl, write_text
-from scripts.promote_lemma import parse_active_metadata, promote_active_theorem
+from scripts.promote_lemma import choose_next_claim, parse_active_metadata, promote_active_theorem, theorem_declared
 from scripts.score_iteration import keep_candidate, score_tuple
 
 ACTIVE_RELATIVE = "Formal/Active.lean"
@@ -426,6 +426,86 @@ def promoted_canary_count(root: Path = ROOT) -> int:
     return sum(1 for row in load_jsonl(root / "claims" / "claims.jsonl") if is_canary_claim_id(row["claim_id"]) and row["status"] == "proved")
 
 
+def inactive_status(lean_status: str | None) -> str:
+    return "proved" if lean_status == "proved" else "candidate"
+
+
+def claim_lookup(root: Path = ROOT) -> dict[str, dict]:
+    return {row["claim_id"]: row for row in load_jsonl(root / "claims" / "claims.jsonl")}
+
+
+def claim_is_available(row: dict, *, root: Path = ROOT) -> bool:
+    if row.get("status") not in {"candidate", "active"}:
+        return False
+    if row.get("lean_status") == "proved":
+        return False
+    if row.get("falsifier_status") == "falsified_small_n":
+        return False
+    return not theorem_declared(root, row["lean_name"])
+
+
+def clear_active_claims(root: Path = ROOT) -> None:
+    for relative in ("claims/claims.jsonl", "claims/candidates.jsonl"):
+        path = root / relative
+        rows = load_jsonl(path)
+        updated: list[dict] = []
+        for row in rows:
+            row = dict(row)
+            if row.get("status") == "active":
+                row["status"] = inactive_status(row.get("lean_status"))
+            updated.append(row)
+        write_jsonl(path, updated)
+
+    progress = read_json(root / "state" / "progress.json")
+    progress["active_claim_id"] = None
+    progress["active_story_id"] = infer_story_id(None)
+    for claim in progress.get("claims", []):
+        if claim.get("status") == "active":
+            claim["status"] = inactive_status(claim.get("lean_status"))
+    write_json(root / "state" / "progress.json", progress)
+    from scripts.claim_templates import active_template_for_claim
+
+    write_text(active_file(root), active_template_for_claim(None))
+
+
+def recoverable_claim_id(root: Path = ROOT) -> str | None:
+    claims = claim_lookup(root)
+    progress = read_json(root / "state" / "progress.json")
+    metadata = parse_active_metadata(active_file(root).read_text())
+
+    preferred_ids: list[str] = []
+    for claim_id in (metadata.get("claim_id"), progress.get("active_claim_id")):
+        if claim_id and claim_id != "NONE" and claim_id not in preferred_ids:
+            preferred_ids.append(claim_id)
+
+    for row in claims.values():
+        if row.get("status") == "active" and row["claim_id"] not in preferred_ids:
+            preferred_ids.append(row["claim_id"])
+
+    for claim_id in preferred_ids:
+        row = claims.get(claim_id)
+        if row is not None and claim_is_available(row, root=root):
+            return claim_id
+
+    next_claim_id = choose_next_claim("", list(claims.values()), root=root)
+    return next_claim_id
+
+
+def active_claim_alignment_issue(root: Path = ROOT) -> str | None:
+    metadata = parse_active_metadata(active_file(root).read_text())
+    claim_id = metadata.get("claim_id")
+    theorem_name = metadata.get("theorem_name")
+    if not claim_id or claim_id == "NONE" or not theorem_name or theorem_name == "none":
+        return None
+    row = claim_lookup(root).get(claim_id)
+    if row is None:
+        return f"active_claim_missing_from_registry:{claim_id}"
+    expected = row.get("lean_name")
+    if expected and expected != theorem_name:
+        return f"active_theorem_mismatch:{claim_id}:{theorem_name}:{expected}"
+    return None
+
+
 def ensure_claim_rows(root: Path, claim_id: str, *, status: str, lean_status: str) -> None:
     if not is_canary_claim_id(claim_id):
         return
@@ -487,6 +567,27 @@ def activate_claim(root: Path, claim_id: str) -> None:
     write_text(active_file(root), active_template_for_claim(claim_id))
 
 
+def finalize_frontier_state(root: Path, *, canary_mode: bool, streak: int, current_claim_id: str | None) -> dict[str, object]:
+    metadata = parse_active_metadata(active_file(root).read_text())
+    if metadata.get("claim_id") == "NONE" or metadata.get("theorem_name") == "none" or active_claim_alignment_issue(root):
+        seed_claim_id = recoverable_claim_id(root)
+        if seed_claim_id is None:
+            clear_active_claims(root)
+            return {
+                "canary_mode": False,
+                "canary_streak": streak,
+                "active_claim_id": None,
+            }
+        activate_claim(root, seed_claim_id)
+        current_claim_id = seed_claim_id
+        canary_mode = is_canary_claim_id(seed_claim_id)
+    return {
+        "canary_mode": canary_mode and is_canary_claim_id(current_claim_id),
+        "canary_streak": streak,
+        "active_claim_id": current_claim_id,
+    }
+
+
 def prepare_frontier(root: Path = ROOT) -> dict[str, object]:
     progress = read_json(root / "state" / "progress.json")
     current_claim_id = progress.get("active_claim_id")
@@ -497,31 +598,17 @@ def prepare_frontier(root: Path = ROOT) -> dict[str, object]:
         gate_complete = True
     if gate_complete and is_canary_claim_id(current_claim_id):
         activate_claim(root, CANARY_RESUME_CLAIM_ID)
-        return {
-            "canary_mode": False,
-            "canary_streak": streak,
-            "active_claim_id": CANARY_RESUME_CLAIM_ID,
-        }
+        current_claim_id = CANARY_RESUME_CLAIM_ID
+        return finalize_frontier_state(root, canary_mode=False, streak=streak, current_claim_id=current_claim_id)
     if gate_complete or not is_canary_mode_enabled(root):
-        return {
-            "canary_mode": False,
-            "canary_streak": streak,
-            "active_claim_id": current_claim_id,
-        }
+        return finalize_frontier_state(root, canary_mode=False, streak=streak, current_claim_id=current_claim_id)
     if is_canary_claim_id(current_claim_id):
         activate_claim(root, current_claim_id)
-        return {
-            "canary_mode": True,
-            "canary_streak": streak,
-            "active_claim_id": current_claim_id,
-        }
+        return finalize_frontier_state(root, canary_mode=True, streak=streak, current_claim_id=current_claim_id)
     next_canary_claim_id = canary_claim_id(promoted_canary_count(root) + 1)
     activate_claim(root, next_canary_claim_id)
-    return {
-        "canary_mode": True,
-        "canary_streak": streak,
-        "active_claim_id": next_canary_claim_id,
-    }
+    current_claim_id = next_canary_claim_id
+    return finalize_frontier_state(root, canary_mode=True, streak=streak, current_claim_id=current_claim_id)
 
 
 def next_claim_after_promotion(promoted_claim_id: str | None, *, canary_mode: bool, canary_streak: int) -> str | None:
@@ -748,6 +835,9 @@ def run_iteration(
     pristine_snapshot = snapshot_repo(root)
     base_commit = git_head(root)
     frontier_mode = prepare_frontier(root)
+    if frontier_mode["active_claim_id"] is None:
+        restore_snapshot(pristine_snapshot, root=root)
+        raise RuntimeError("No active frontier claim is available. Active.lean is idle and no executable candidate claim remains.")
 
     baseline_metrics, baseline_outputs = evaluate_candidate_patch(root)
     baseline_snapshot = snapshot_repo(root)
@@ -829,6 +919,36 @@ def run_iteration(
             )
             append_history(payload, root=root)
             previous_feedback = format_feedback(payload["keep_reason"], baseline_outputs, agent_changed_files)
+            continue
+
+        alignment_issue = active_claim_alignment_issue(root)
+        if alignment_issue:
+            restore_snapshot(baseline_snapshot, root=root)
+            payload = build_history_payload(
+                iteration_id=iteration_id,
+                attempt_number=attempt_number,
+                prompt_summary_text=prompt_summary_text,
+                changed_claim_ids=[claim_id] if claim_id else [],
+                changed_theorem_names=[theorem_name] if theorem_name else [],
+                before_metrics=baseline_metrics,
+                after_metrics=baseline_metrics,
+                status="discarded",
+                commit_hash=None,
+                keep_reason=alignment_issue,
+                failure_stage="agent_edit",
+                failure_invariant="claim_theorem_alignment",
+                agent_message=agent_result.last_message,
+                base_commit=base_commit,
+                baseline_state=baseline_state,
+                candidate_active_text=candidate_active_text,
+                frontier_before=frontier_before,
+                frontier_after=frontier_before,
+                agent_changed_files=agent_changed_files,
+                promotion=None,
+                canary_mode=bool(frontier_mode["canary_mode"]),
+            )
+            append_history(payload, root=root)
+            previous_feedback = alignment_issue
             continue
 
         trial_metrics, outputs = evaluate_candidate_patch(root)

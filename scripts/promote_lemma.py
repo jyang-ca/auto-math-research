@@ -73,6 +73,10 @@ def choose_next_claim(current_claim_id: str, claims_rows: list[dict], *, root: P
     return None
 
 
+def inactive_status(row: dict) -> str:
+    return "proved" if row.get("lean_status") == "proved" else "candidate"
+
+
 def update_claim_rows(claim_rows: list[dict], current_claim_id: str, next_claim_id: str | None) -> list[dict]:
     updated: list[dict] = []
     for row in claim_rows:
@@ -83,19 +87,29 @@ def update_claim_rows(claim_rows: list[dict], current_claim_id: str, next_claim_
             row["falsifier_status"] = row.get("falsifier_status", "survives_small_n")
         elif next_claim_id is not None and row["claim_id"] == next_claim_id:
             row["status"] = "active"
+            if row.get("lean_status") == "not_started":
+                row["lean_status"] = "statement_compiles"
+        elif row.get("status") == "active":
+            row["status"] = inactive_status(row)
         updated.append(row)
     return updated
 
 
 def update_progress(progress: dict, current_claim_id: str, next_claim_id: str | None) -> dict:
     progress = json.loads(json.dumps(progress))
-    progress["active_claim_id"] = next_claim_id or current_claim_id
+    progress["active_claim_id"] = next_claim_id
     progress["active_story_id"] = infer_story_id(next_claim_id)
     for claim in progress["claims"]:
         if claim["claim_id"] == current_claim_id:
             claim["status"] = "proved"
             claim["lean_status"] = "proved"
             claim["falsifier_status"] = "survives_small_n"
+        elif next_claim_id is not None and claim["claim_id"] == next_claim_id:
+            claim["status"] = "active"
+            if claim.get("lean_status") == "not_started":
+                claim["lean_status"] = "statement_compiles"
+        elif claim.get("status") == "active":
+            claim["status"] = inactive_status(claim)
     if next_claim_id is not None and all(claim["claim_id"] != next_claim_id for claim in progress["claims"]):
         progress["claims"].append(
             {
@@ -105,10 +119,6 @@ def update_progress(progress: dict, current_claim_id: str, next_claim_id: str | 
                 "falsifier_status": "unknown",
             }
         )
-    elif next_claim_id is not None:
-        for claim in progress["claims"]:
-            if claim["claim_id"] == next_claim_id:
-                claim["status"] = "active"
     for story in progress["stories"]:
         if story["story_id"] == infer_story_id(next_claim_id) and story["status"] == "pending":
             story["status"] = "active"

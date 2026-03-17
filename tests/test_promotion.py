@@ -114,6 +114,75 @@ class PromotionTests(unittest.TestCase):
             progress = json.loads((root / "state" / "progress.json").read_text())
             self.assertEqual(progress["active_claim_id"], "DTREE_ERR_002")
 
+    def test_promote_active_theorem_without_next_claim_sets_idle_frontier(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            write(root / "Formal" / "GeneratedLemmas.lean", "import Formal.Known\n\nnamespace Formal\n\nend Formal\n")
+            write(
+                root / "Formal" / "Active.lean",
+                active_template_for_claim("DTREE_ERR_001").replace(
+                    "  sorry\n",
+                    "  simpa [uniformError] using (uniformErrorFn_self (f := eval t))\n",
+                ),
+            )
+            claim_rows = [
+                {
+                    "claim_id": "DTREE_ERR_001",
+                    "title": "Uniform error of identical trees is zero",
+                    "status": "active",
+                    "source": {"paper_id": "seed", "section": "Defs", "page_hint": "2"},
+                    "claim_type": "theorem",
+                    "priority": 5,
+                    "difficulty": 1,
+                    "small_check": True,
+                    "depends_on": ["DEF_UNIFORM_ERROR"],
+                    "nl_statement": "A decision tree has zero uniform error against itself.",
+                    "lean_name": "active_uniformError_self_zero",
+                    "lean_status": "statement_compiles",
+                    "falsifier_status": "survives_small_n",
+                    "notes": "seed",
+                }
+            ]
+            write(root / "claims" / "claims.jsonl", "\n".join(json.dumps(row, sort_keys=True) for row in claim_rows) + "\n")
+            write(root / "claims" / "candidates.jsonl", "\n".join(json.dumps(row, sort_keys=True) for row in claim_rows) + "\n")
+            write(
+                root / "state" / "progress.json",
+                json.dumps(
+                    {
+                        "project_id": "test",
+                        "problem_focus": "test",
+                        "active_story_id": "ST-06",
+                        "active_claim_id": "DTREE_ERR_001",
+                        "stories": [
+                            {"story_id": "ST-06", "title": "Uniform error", "status": "active", "acceptance": [], "evidence": []}
+                        ],
+                        "claims": [
+                            {
+                                "claim_id": "DTREE_ERR_001",
+                                "status": "active",
+                                "lean_status": "statement_compiles",
+                                "falsifier_status": "survives_small_n",
+                            }
+                        ],
+                        "latest_kept_commit": None,
+                        "baseline_metrics_file": "state/metrics.json",
+                    },
+                    indent=2,
+                )
+                + "\n",
+            )
+
+            result = promote_active_theorem(root=root)
+
+            self.assertIsNone(result.next_claim_id)
+            self.assertIn("claim_id: NONE", (root / "Formal" / "Active.lean").read_text())
+            claims = read_jsonl(root / "claims" / "claims.jsonl")
+            self.assertEqual(claims[0]["status"], "proved")
+            progress = json.loads((root / "state" / "progress.json").read_text())
+            self.assertIsNone(progress["active_claim_id"])
+            self.assertEqual(progress["active_story_id"], "ST-11")
+            self.assertEqual(progress["claims"][0]["status"], "proved")
+
 
 if __name__ == "__main__":
     unittest.main()
